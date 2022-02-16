@@ -1,6 +1,14 @@
 # pykeeb :snake: :keyboard:
 
-A small Python script that prints out currently connected keyboards :keyboard:.
+A small Python script that detects and prints out currently connected keyboard(s).
+
+Supports Linux, MacOS, and Windows platforms using the following built-in tools available for each platform:
+
+| Platform | Tool              |
+|----------|-------------------|
+| Linux    | `lsusb`           |
+| MacOS    | `system_profiler` |
+| Windows  | `Powershell`      |
 
 ## Usage
 
@@ -16,7 +24,7 @@ usage: pykeeb.py [-h] [-n]
 
 optional arguments:
   -h, --help       show this help message and exit
-  -n, --no-dongle  Exclude keyboard dongles and/or receivers
+  -n, --no-dongle  exclude keyboard dongles and/or receivers
 ```
 
 ## Demo
@@ -25,5 +33,5 @@ optional arguments:
 
 ## TODO
 
-- [] Add MacOS support
-- [] Add Windows support
+- [x] Add MacOS support
+- [ ] Add Windows support
