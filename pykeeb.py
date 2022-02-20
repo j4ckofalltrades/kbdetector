@@ -4,11 +4,10 @@
 Lightweight script to detect and print out all keyboards connected (via USB including dongles / wireless receivers) to
 the machine, without any external dependencies.
 
-Supports Linux, MacOS, and Windows platforms using the following built-in tools available for each platform:
+Supports Linux and MacOS using the following built-in tools:
 
-Linux   - lsusb
-MacOS   - system_profiler
-Windows - Powershell
+Linux - lsusb
+MacOS - system_profiler
 """
 
 import argparse
@@ -40,8 +39,8 @@ def linux_detect_kbs():
             match = device_re.match(device)
             if match:
                 device_info = match.groupdict()
-                keeb_info = str(device_info['tag']).replace('b\'', '').replace('\'', '')
-                result.append(keeb_info)
+                keeb = str(device_info['tag']).replace('b\'', '').replace('\'', '')
+                result.append(keeb)
 
     return result
 
@@ -51,32 +50,31 @@ def mac_detect_kbs():
     devices = subprocess.check_output(
         """
         system_profiler SPUSBDataType | egrep -B 2 -A 6 'Product ID' | sed 's/^--/#/'\
-            | head -2 | egrep ':$' | sed -e 's/^ *//g' -e 's/ *:$//g'
+            | egrep ':$' | sed -e 's/^ *//g' -e 's/ *:$//g'
         """,
         shell=True
     )
 
     result = []
     for device in devices.split(b'\n'):
-        keeb = str(device).replace('b\'', '').replace('\'', '')
-        result.append(keeb)
+        if device:
+            keeb = str(device).replace('b\'', '').replace('\'', '')
+            result.append(keeb)
 
     # filter out obvious false positives
     filtered = filter(
-        lambda k: "mouse" not in str(k).lower() and "hub" not in str(k).lower(),
-        list(filter(None, result))
+        lambda k: "hub" not in str(k).lower() and "mouse" not in str(k).lower() and "usb" not in str(k).lower(),
+        result
     )
 
     return list(filtered)
 
 
-def win_detect_kbs():
-    logging.info("TODO: add Windows support")
-    return []
-
-
 def filter_dongles(kbs: list):
-    filtered = filter(lambda k: "receiver" not in str(k).lower() and "dongle" not in str(k).lower(), kbs)
+    filtered = filter(
+        lambda k: "receiver" not in str(k).lower() and "dongle" not in str(k).lower(),
+        kbs
+    )
     return list(filtered)
 
 
@@ -106,8 +104,6 @@ if __name__ == '__main__':
         keebs = filter_dongles(linux_detect_kbs()) if args.no_dongle else linux_detect_kbs()
     elif "darwin" in platform:
         keebs = filter_dongles(mac_detect_kbs()) if args.no_dongle else mac_detect_kbs()
-    elif "windows" in platform:
-        keebs = filter_dongles(win_detect_kbs()) if args.no_dongle else win_detect_kbs()
     else:
         logging.error("Unsupported platform: " + platform)
         exit(1)
