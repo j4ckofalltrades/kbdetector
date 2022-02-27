@@ -15,8 +15,10 @@ A small Python script that detects and prints out currently connected keyboard(s
 usage: pykeeb.py [-h] [-n]
 
 optional arguments:
-  -h, --help        show this help message and exit
-  -n, --no-dongles  exclude keyboard dongles and/or receivers
+  -h, --help            show this help message and exit
+  -e EXCLUDE, --exclude EXCLUDE
+                        comma-separated list of keyboards to exclude
+  -n, --no-dongle       exclude keyboard dongles and/or receivers
 ```
 
 ## Demo

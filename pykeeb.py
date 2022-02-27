@@ -21,6 +21,7 @@ logging.basicConfig(level=logging.INFO, format='%(message)s')
 
 def parse_args():
     parser = argparse.ArgumentParser()
+    parser.add_argument("-e", "--exclude", help="comma-separated list of keyboards to exclude")
     parser.add_argument("-n", "--no-dongle", action="store_true", help="exclude keyboard dongles and/or receivers")
     return parser.parse_args()
 
@@ -108,4 +109,9 @@ if __name__ == '__main__':
         logging.error("Unsupported platform: " + platform)
         exit(1)
 
-    print_keebs(keebs)
+    if args.exclude:
+        exclude = args.exclude.split(",")
+        filtered = [kb for kb in keebs if kb not in exclude]
+        print_keebs(filtered)
+    else:
+        print_keebs(keebs)
