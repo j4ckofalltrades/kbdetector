@@ -1,4 +1,4 @@
-# pykeeb :snake: :keyboard:
+# kbdetector :keyboard:
 
 A small Python script that detects and prints out currently connected keyboard(s) on Linux and MacOS without any external dependencies.
 
