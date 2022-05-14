@@ -27,48 +27,55 @@ def parse_args():
 
 
 def linux_detect_kbs():
-    device_pattern = b"Bus\\s+(?P<bus>\\d+)\\s+Device\\s+(?P<device>\\d+).+ID\\s(?P<id>\\w+:\\w+)\\s(?P<tag>.+)$"
-    device_re = re.compile(device_pattern, re.I)
-    devices = subprocess.check_output(
-        "lsusb -v 2>/dev/null | egrep '(^Bus|Keyboard)' | grep -B1 Keyboard",
-        shell=True
-    )
+    try:
+        device_pattern = b"Bus\\s+(?P<bus>\\d+)\\s+Device\\s+(?P<device>\\d+).+ID\\s(?P<id>\\w+:\\w+)\\s(?P<tag>.+)$"
+        device_re = re.compile(device_pattern, re.I)
+        devices = subprocess.check_output(
+            "lsusb -v 2>/dev/null | egrep '(^Bus|Keyboard)' | grep -B1 Keyboard",
+            shell=True
+        )
 
-    result = []
-    for device in devices.split(b'\n'):
-        if device:
-            match = device_re.match(device)
-            if match:
-                device_info = match.groupdict()
-                keeb = str(device_info['tag']).replace('b\'', '').replace('\'', '')
-                result.append(keeb)
+        result = []
+        for device in devices.split(b'\n'):
+            if device:
+                match = device_re.match(device)
+                if match:
+                    device_info = match.groupdict()
+                    keeb = str(device_info['tag']).replace('b\'', '').replace('\'', '')
+                    result.append(keeb)
 
-    return result
-
+        return result
+    except BaseException as err:
+        return []
+        
 
 def mac_detect_kbs():
-    # collect all connected device names as no further information about device type is available
-    devices = subprocess.check_output(
-        """
-        system_profiler SPUSBDataType | egrep -B 2 -A 6 'Product ID' | sed 's/^--/#/'\
-            | egrep ':$' | sed -e 's/^ *//g' -e 's/ *:$//g'
-        """,
-        shell=True
-    )
+    try:
+        # collect all connected device names as no further information about device type is available
+        devices = subprocess.check_output(
+            """
+            system_profiler SPUSBDataType | egrep -B 2 -A 6 'Product ID' | sed 's/^--/#/'\
+                | egrep ':$' | sed -e 's/^ *//g' -e 's/ *:$//g'
+            """,
+            shell=True
+        )
 
-    result = []
-    for device in devices.split(b'\n'):
-        if device:
-            keeb = str(device).replace('b\'', '').replace('\'', '')
-            result.append(keeb)
+        result = []
+        for device in devices.split(b'\n'):
+            if device:
+                keeb = str(device).replace('b\'', '').replace('\'', '')
+                result.append(keeb)
 
-    # filter out obvious false positives
-    filtered = filter(
-        lambda k: "hub" not in str(k).lower() and "mouse" not in str(k).lower() and "usb" not in str(k).lower(),
-        result
-    )
+        # filter out obvious false positives
+        filtered = filter(
+            lambda k: "hub" not in str(k).lower() and "mouse" not in str(k).lower() and "usb" not in str(k).lower(),
+            result
+        )
 
-    return list(filtered)
+        return list(filtered)
+    except BaseException as err:
+        return []
+
 
 
 def filter_dongles(kbs: list):
